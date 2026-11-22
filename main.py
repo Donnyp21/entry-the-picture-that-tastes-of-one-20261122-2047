@@ -19,6 +19,7 @@ Python 3.13 standard library only. No network. Deterministic: the
 output is a byte-for-byte copy of art.jpg.
 """
 
+import hashlib
 import os
 import shutil
 import struct
@@ -101,6 +102,14 @@ def run():
     shutil.copyfile(src, dst)
     if os.path.getsize(dst) != nbytes:
         print("error: the copy's size differs from the artwork",
+              file=sys.stderr)
+        return 1
+    with open(src, "rb") as fh:
+        src_hash = hashlib.sha256(fh.read()).hexdigest()
+    with open(dst, "rb") as fh:
+        dst_hash = hashlib.sha256(fh.read()).hexdigest()
+    if src_hash != dst_hash:
+        print("error: the copy's bytes differ from the artwork",
               file=sys.stderr)
         return 1
     print(f"wrote {dst}: {nbytes} bytes")
